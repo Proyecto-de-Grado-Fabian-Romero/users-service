@@ -1,6 +1,5 @@
 namespace UsersService.src.WebApi.Controllers;
 
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using UsersService.Src.Application.DTOs;
 using UsersService.Src.Application.Interfaces;
@@ -33,5 +32,28 @@ public class UsersController(IUserService userService) : ControllerBase
         }
 
         return Ok(user);
+    }
+
+    [HttpGet("me")]
+    public async Task<ActionResult<LoggedUserDTO>> GetCurrentUser()
+    {
+        var accessToken = Request.Headers.Authorization.ToString().Replace("Bearer ", string.Empty);
+        var user = await _userService.GetUserFromAccessTokenAsync(accessToken);
+        return user == null ? Unauthorized() : Ok(user);
+    }
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<string>> RefreshAccessToken([FromBody] RefreshTokenRequest request)
+    {
+        var newToken = await _userService.RefreshAccessTokenAsync(request.RefreshToken);
+        return string.IsNullOrEmpty(newToken) ? Unauthorized() : Ok(newToken);
+    }
+
+    [HttpGet("verify-token")]
+    public async Task<ActionResult<bool>> VerifyAccessToken()
+    {
+        var accessToken = Request.Headers.Authorization.ToString().Replace("Bearer ", string.Empty);
+        var isValid = await _userService.IsAccessTokenValidAsync(accessToken);
+        return Ok(isValid);
     }
 }

@@ -1,4 +1,8 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
+using System.Text;
 using Amazon.CognitoIdentityProvider;
+using Amazon.CognitoIdentityProvider.Model;
 using Amazon.Extensions.CognitoAuthentication;
 using AutoMapper;
 using UsersService.Src.Application.DTOs;
@@ -65,5 +69,78 @@ public class UserService : IUserService
         {
             return null;
         }
+    }
+
+    public async Task<LoggedUserDTO?> GetUserFromAccessTokenAsync(string accessToken)
+    {
+        try
+        {
+            var request = new Amazon.CognitoIdentityProvider.Model.GetUserRequest
+            {
+                AccessToken = accessToken,
+            };
+
+            var response = await _provider.GetUserAsync(request);
+            var sub = response.UserAttributes.FirstOrDefault(a => a.Name == "sub")?.Value;
+            Console.WriteLine(response);
+
+            if (string.IsNullOrEmpty(sub))
+            {
+                return null;
+            }
+
+            var user = await _userRepository.GetByIdAsync(Guid.Parse(sub));
+            return user == null ? null : _mapper.Map<LoggedUserDTO>(user);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<string?> RefreshAccessTokenAsync(string refreshToken)
+    {
+        var request = new InitiateAuthRequest
+        {
+            AuthFlow = AuthFlowType.REFRESH_TOKEN_AUTH,
+            ClientId = _userPool.ClientID,
+            AuthParameters = new Dictionary<string, string>
+            {
+                { "REFRESH_TOKEN", refreshToken },
+            },
+        };
+
+        try
+        {
+            var result = await _provider.InitiateAuthAsync(request);
+            return result.AuthenticationResult?.AccessToken;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public Task<bool> IsAccessTokenValidAsync(string accessToken)
+    {
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(accessToken);
+            var exp = token.ValidTo;
+            return Task.FromResult(exp > DateTime.UtcNow);
+        }
+        catch
+        {
+            return Task.FromResult(false);
+        }
+    }
+
+    private string GenerateSecretHash(string username, string clientId, string clientSecret)
+    {
+        var key = Encoding.UTF8.GetBytes(clientSecret);
+        var message = Encoding.UTF8.GetBytes(username + clientId);
+        using var hmac = new HMACSHA256(key);
+        return Convert.ToBase64String(hmac.ComputeHash(message));
     }
 }
