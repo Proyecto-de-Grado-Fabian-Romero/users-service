@@ -5,4 +5,6 @@ namespace UsersService.Src.Domain.Interfaces;
 public interface IUserRepository
 {
     Task<User?> GetByPublicIdAsync(Guid publicId);
+
+    Task<User?> GetByIdAsync(Guid subId);
 }
