@@ -1,25 +1,34 @@
-using System;
-using AutoMapper;
+using UsersService.Src.Application.Commands.Interfaces;
 using UsersService.Src.Application.DTOs;
 using UsersService.Src.Application.Interfaces;
-using UsersService.Src.Domain.Interfaces;
 
 namespace UsersService.src.Application.Services;
 
-public class UserService : IUserService
+public class UserService(
+    ICommand<(string, string), LoggedUserDTO?> loginUserCommand,
+    ICommand<string, LoggedUserDTO?> getLoggedUserCommand,
+    ICommand<Guid, UserDTO?> getUserByPublicIdCommand,
+    ICommand<string, string?> refreshTokenCommand,
+    ICommand<string, bool> validateAccessTokenCommand) : IUserService
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IMapper _mapper;
+    private readonly ICommand<(string, string), LoggedUserDTO?> _loginUserCommand = loginUserCommand;
+    private readonly ICommand<string, LoggedUserDTO?> _getLoggedUserCommand = getLoggedUserCommand;
+    private readonly ICommand<Guid, UserDTO?> _getUserByPublicIdCommand = getUserByPublicIdCommand;
+    private readonly ICommand<string, string?> _refreshTokenCommand = refreshTokenCommand;
+    private readonly ICommand<string, bool> _validateAccessTokenCommand = validateAccessTokenCommand;
 
-    public UserService(IUserRepository userRepository, IMapper mapper)
-    {
-        _userRepository = userRepository;
-        _mapper = mapper;
-    }
+    public Task<UserDTO?> GetByPublicIdAsync(Guid publicId) =>
+        _getUserByPublicIdCommand.ExecuteAsync(publicId);
 
-    public async Task<UserDTO?> GetByPublicIdAsync(Guid publicId)
-    {
-        var user = await _userRepository.GetByPublicIdAsync(publicId);
-        return user == null ? null : _mapper.Map<UserDTO>(user);
-    }
+    public Task<LoggedUserDTO?> LoginAsync(string email, string password) =>
+        _loginUserCommand.ExecuteAsync((email, password));
+
+    public Task<LoggedUserDTO?> GetUserFromAccessTokenAsync(string accessToken) =>
+        _getLoggedUserCommand.ExecuteAsync(accessToken);
+
+    public Task<string?> RefreshAccessTokenAsync(string refreshToken) =>
+        _refreshTokenCommand.ExecuteAsync(refreshToken);
+
+    public Task<bool> IsAccessTokenValidAsync(string accessToken) =>
+        _validateAccessTokenCommand.ExecuteAsync(accessToken);
 }

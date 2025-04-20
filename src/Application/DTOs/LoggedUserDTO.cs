@@ -23,4 +23,8 @@ public class LoggedUserDTO
     public string? PhotoFileUrl { get; set; }
 
     public bool? Verified { get; set; }
+
+    public string AccessToken { get; set; } = string.Empty;
+
+    public string RefreshToken { get; set; } = string.Empty;
 }
