@@ -14,4 +14,6 @@ public interface IUserService
     Task<string?> RefreshAccessTokenAsync(string refreshToken);
 
     Task<bool> IsAccessTokenValidAsync(string accessToken);
+
+    Task<bool> LogoutAsync(string? refreshToken);
 }

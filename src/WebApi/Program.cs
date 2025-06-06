@@ -18,6 +18,26 @@ DotNetEnv.Env.Load();
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontEnd", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
@@ -30,6 +50,15 @@ builder.Services.AddScoped<ICommand<string, LoggedUserDTO?>, GetLoggedUserComman
 builder.Services.AddScoped<ICommand<Guid, UserDTO?>, GetUserByPublicIdCommand>();
 builder.Services.AddScoped<ICommand<string, string?>, RefreshAccessTokenCommand>();
 builder.Services.AddScoped<ICommand<string, bool>, ValidateAccessTokenCommand>();
+builder.Services.AddScoped<ICommand<string?, bool>, LogoutUserCommand>(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    var cognitoClient = provider.GetRequiredService<AmazonCognitoIdentityProviderClient>();
+    var clientId = config["AWS:Cognito:ClientId"];
+#pragma warning disable CS8604 // Possible null reference argument.
+    return new LogoutUserCommand(cognitoClient, clientId);
+#pragma warning restore CS8604 // Possible null reference argument.
+});
 
 builder.Services.AddSingleton(provider =>
 {
@@ -48,20 +77,11 @@ builder.Services.AddSingleton(provider =>
         client);
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
-
 builder.Services.AddAutoMapper(typeof(UserProfile));
 
 var app = builder.Build();
 app.MapControllers();
+app.UseCors("AllowFrontEnd");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
