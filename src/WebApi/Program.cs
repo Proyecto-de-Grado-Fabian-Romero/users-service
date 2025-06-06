@@ -50,6 +50,7 @@ builder.Services.AddScoped<ICommand<string, LoggedUserDTO?>, GetLoggedUserComman
 builder.Services.AddScoped<ICommand<Guid, UserDTO?>, GetUserByPublicIdCommand>();
 builder.Services.AddScoped<ICommand<string, string?>, RefreshAccessTokenCommand>();
 builder.Services.AddScoped<ICommand<string, bool>, ValidateAccessTokenCommand>();
+builder.Services.AddScoped<ICommand<string?, bool>, LogoutUserCommand>();
 
 builder.Services.AddSingleton(provider =>
 {

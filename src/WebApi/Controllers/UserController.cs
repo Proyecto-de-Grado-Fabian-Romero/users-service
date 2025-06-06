@@ -105,4 +105,18 @@ public class UsersController(IUserService userService) : ControllerBase
         var isValid = await _userService.IsAccessTokenValidAsync(accessToken);
         return Ok(isValid);
     }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        var refreshToken = Request.Cookies["refreshToken"];
+
+        await _userService.LogoutAsync(refreshToken);
+
+        Response.Cookies.Delete("accessToken");
+        Response.Cookies.Delete("refreshToken");
+        Response.Cookies.Delete("publicId");
+
+        return Ok(new { message = "Logged out successfully." });
+    }
 }

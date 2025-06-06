@@ -9,6 +9,7 @@ public class UserService(
     ICommand<string, LoggedUserDTO?> getLoggedUserCommand,
     ICommand<Guid, UserDTO?> getUserByPublicIdCommand,
     ICommand<string, string?> refreshTokenCommand,
+    ICommand<string?, bool> logoutUserCommand,
     ICommand<string, bool> validateAccessTokenCommand) : IUserService
 {
     private readonly ICommand<(string, string), LoggedUserDTO?> _loginUserCommand = loginUserCommand;
@@ -16,6 +17,8 @@ public class UserService(
     private readonly ICommand<Guid, UserDTO?> _getUserByPublicIdCommand = getUserByPublicIdCommand;
     private readonly ICommand<string, string?> _refreshTokenCommand = refreshTokenCommand;
     private readonly ICommand<string, bool> _validateAccessTokenCommand = validateAccessTokenCommand;
+
+    private readonly ICommand<string?, bool> _logoutUserCommand = logoutUserCommand;
 
     public Task<UserDTO?> GetByPublicIdAsync(Guid publicId) =>
         _getUserByPublicIdCommand.ExecuteAsync(publicId);
@@ -31,4 +34,7 @@ public class UserService(
 
     public Task<bool> IsAccessTokenValidAsync(string accessToken) =>
         _validateAccessTokenCommand.ExecuteAsync(accessToken);
+
+    public Task<bool> LogoutAsync(string? refreshToken) =>
+    _logoutUserCommand.ExecuteAsync(refreshToken);
 }
