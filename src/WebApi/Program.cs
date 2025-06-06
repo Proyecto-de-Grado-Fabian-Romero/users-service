@@ -55,9 +55,9 @@ builder.Services.AddScoped<ICommand<string?, bool>, LogoutUserCommand>(provider 
     var config = provider.GetRequiredService<IConfiguration>();
     var cognitoClient = provider.GetRequiredService<AmazonCognitoIdentityProviderClient>();
     var clientId = config["AWS:Cognito:ClientId"];
-    #pragma warning disable CS8604 // Possible null reference argument.
+#pragma warning disable CS8604 // Possible null reference argument.
     return new LogoutUserCommand(cognitoClient, clientId);
-    #pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning restore CS8604 // Possible null reference argument.
 });
 
 builder.Services.AddSingleton(provider =>
