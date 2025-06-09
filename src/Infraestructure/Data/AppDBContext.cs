@@ -7,10 +7,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users { get; set; }
 
+    public DbSet<BankPaymentData> BankPaymentData { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()
             .Property(u => u.Role)
             .HasConversion<string>();
+
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.BankPaymentData)
+            .WithOne(b => b.User)
+            .HasForeignKey<BankPaymentData>(b => b.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

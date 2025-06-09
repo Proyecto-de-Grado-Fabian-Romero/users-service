@@ -2,11 +2,13 @@ using Amazon.CognitoIdentityProvider;
 using Amazon.Extensions.CognitoAuthentication;
 using Microsoft.EntityFrameworkCore;
 using UsersService.Src.Application.Commands.Concretes;
+using UsersService.Src.Application.Commands.Concretes.BankPayment;
+using UsersService.Src.Application.Commands.Data;
 using UsersService.Src.Application.Commands.Interfaces;
 using UsersService.Src.Application.DTOs;
 using UsersService.Src.Application.Interfaces;
 using UsersService.Src.Application.Mapping;
-using UsersService.src.Application.Services;
+using UsersService.Src.Application.Services;
 using UsersService.Src.Domain.Interfaces;
 using UsersService.Src.Infraestructure.Data;
 using UsersService.Src.Infraestructure.Repositories;
@@ -45,6 +47,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBankPaymentDataRepository, BankPaymentDataRepository>();
+builder.Services.AddScoped<IBankPaymentDataService, BankPaymentDataService>();
+
 builder.Services.AddScoped<ICommand<(string, string), LoggedUserDTO?>, LoginUserCommand>();
 builder.Services.AddScoped<ICommand<string, LoggedUserDTO?>, GetLoggedUserCommand>();
 builder.Services.AddScoped<ICommand<Guid, UserDTO?>, GetUserByPublicIdCommand>();
@@ -59,6 +64,8 @@ builder.Services.AddScoped<ICommand<string?, bool>, LogoutUserCommand>(provider 
     return new LogoutUserCommand(cognitoClient, clientId);
 #pragma warning restore CS8604 // Possible null reference argument.
 });
+builder.Services.AddScoped<ICommand<BankPaymentInput, bool>, CreateBankPaymentDataCommand>();
+builder.Services.AddScoped<ICommand<BankPaymentInput, bool>, UpdateBankPaymentDataCommand>();
 
 builder.Services.AddSingleton(provider =>
 {

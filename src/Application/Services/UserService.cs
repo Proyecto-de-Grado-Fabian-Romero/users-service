@@ -2,7 +2,7 @@ using UsersService.Src.Application.Commands.Interfaces;
 using UsersService.Src.Application.DTOs;
 using UsersService.Src.Application.Interfaces;
 
-namespace UsersService.src.Application.Services;
+namespace UsersService.Src.Application.Services;
 
 public class UserService(
     ICommand<(string, string), LoggedUserDTO?> loginUserCommand,
