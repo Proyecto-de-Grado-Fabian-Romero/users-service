@@ -6,14 +6,9 @@ namespace UsersService.Src.WebApi.Controllers;
 
 [ApiController]
 [Route("api/bank-payment")]
-public class BankPaymentDataController : ControllerBase
+public class BankPaymentDataController(IBankPaymentDataService service) : ControllerBase
 {
-    private readonly IBankPaymentDataService _service;
-
-    public BankPaymentDataController(IBankPaymentDataService service)
-    {
-        _service = service;
-    }
+    private readonly IBankPaymentDataService _service = service;
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateBankPaymentDataDto dto)
