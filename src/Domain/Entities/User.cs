@@ -27,4 +27,6 @@ public class User
     public string? PhotoFileUrl { get; set; }
 
     public bool? Verified { get; set; }
+
+    public BankPaymentData? BankPaymentData { get; set; }
 }
