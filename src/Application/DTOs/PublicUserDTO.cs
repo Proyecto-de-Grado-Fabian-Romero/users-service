@@ -1,3 +1,5 @@
+using UsersService.Src.Application.DTOs.BankPaymentData;
+
 namespace UsersService.Src.Application.DTOs;
 
 public class UserDTO
@@ -19,4 +21,6 @@ public class UserDTO
     public string? PhotoFileUrl { get; set; }
 
     public bool? Verified { get; set; }
+
+    public BankPaymentDataDTO? BankPaymentData { get; set; }
 }

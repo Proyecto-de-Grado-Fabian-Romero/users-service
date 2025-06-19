@@ -1,3 +1,5 @@
+using UsersService.Src.Application.DTOs.BankPaymentData;
+
 namespace UsersService.Src.Application.DTOs;
 
 public class LoggedUserDTO
@@ -27,4 +29,6 @@ public class LoggedUserDTO
     public string AccessToken { get; set; } = string.Empty;
 
     public string RefreshToken { get; set; } = string.Empty;
+
+    public BankPaymentDataDTO? BankPaymentData { get; set; }
 }

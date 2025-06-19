@@ -7,4 +7,6 @@ public interface IUserRepository
     Task<User?> GetByPublicIdAsync(Guid publicId);
 
     Task<User?> GetByIdAsync(Guid subId);
+
+    Task PromoteToOwnerAsync(Guid publicId);
 }
