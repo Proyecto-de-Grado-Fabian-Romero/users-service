@@ -58,13 +58,42 @@ public class UsersController(IUserService userService) : ControllerBase
     public async Task<ActionResult<LoggedUserDTO>> GetCurrentUser()
     {
         var accessToken = Request.Cookies["accessToken"];
-        if (string.IsNullOrEmpty(accessToken))
+        var refreshToken = Request.Cookies["refreshToken"];
+
+        if ((string.IsNullOrEmpty(accessToken) && string.IsNullOrEmpty(refreshToken)) || accessToken == null)
         {
-            return Unauthorized("No access token provided.");
+            return Unauthorized("No tokens provided.");
         }
 
         var user = await _userService.GetUserFromAccessTokenAsync(accessToken);
-        return user == null ? Unauthorized() : Ok(user);
+        if (user != null)
+        {
+            return Ok(user);
+        }
+
+        if (!string.IsNullOrEmpty(refreshToken))
+        {
+            var newAccessToken = await _userService.RefreshAccessTokenAsync(refreshToken);
+
+            if (!string.IsNullOrEmpty(newAccessToken))
+            {
+                Response.Cookies.Append("accessToken", newAccessToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(1),
+                });
+
+                var refreshedUser = await _userService.GetUserFromAccessTokenAsync(newAccessToken);
+                if (refreshedUser != null)
+                {
+                    return Ok(refreshedUser);
+                }
+            }
+        }
+
+        return Unauthorized("Invalid or expired tokens.");
     }
 
     [HttpPost("refresh")]

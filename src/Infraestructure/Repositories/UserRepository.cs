@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UsersService.Src.Domain.Entities;
+using UsersService.Src.Domain.Enums;
 using UsersService.Src.Domain.Interfaces;
 using UsersService.Src.Infraestructure.Data;
 
@@ -12,11 +13,22 @@ public class UserRepository(AppDbContext context) : IUserRepository
     public async Task<User?> GetByPublicIdAsync(Guid publicId)
     {
         return await _context.Users
+        .Include(u => u.BankPaymentData)
             .FirstOrDefaultAsync(u => u.PublicId == publicId);
     }
 
     public async Task<User?> GetByIdAsync(Guid id)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        return await _context.Users.Include(u => u.BankPaymentData).FirstOrDefaultAsync(u => u.Id == id);
+    }
+
+    public async Task PromoteToOwnerAsync(Guid publicId)
+    {
+        var user = await GetByPublicIdAsync(publicId);
+        if (user is not null && user.Role != UserRole.Owner)
+        {
+            user.Role = UserRole.Owner;
+            await _context.SaveChangesAsync();
+        }
     }
 }
