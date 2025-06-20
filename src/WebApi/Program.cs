@@ -8,6 +8,7 @@ using UsersService.Src.Application.Commands.Interfaces;
 using UsersService.Src.Application.DTOs;
 using UsersService.Src.Application.Interfaces;
 using UsersService.Src.Application.Mapping;
+using UsersService.Src.Application.Options;
 using UsersService.Src.Application.Services;
 using UsersService.Src.Domain.Interfaces;
 using UsersService.Src.Infraestructure.Data;
@@ -83,6 +84,8 @@ builder.Services.AddSingleton(provider =>
         config["AWS:Cognito:ClientId"],
         client);
 });
+builder.Services.Configure<CognitoSettings>(
+    builder.Configuration.GetSection("AWS:Cognito"));
 
 builder.Services.AddAutoMapper(typeof(UserProfile));
 
