@@ -22,9 +22,6 @@ public class UserService(
     private readonly ICommand<string?, bool> _logoutUserCommand = logoutUserCommand;
     private readonly ICommand<(Guid, UpdateUserRequestDTO), bool> _updateUserCommand = updateUserCommand;
 
-    public Task<bool> UpdateUserAsync(Guid publicId, UpdateUserRequestDTO dto) =>
-        _updateUserCommand.ExecuteAsync((publicId, dto));
-
     public Task<UserDTO?> GetByPublicIdAsync(Guid publicId) =>
         _getUserByPublicIdCommand.ExecuteAsync(publicId);
 
@@ -41,5 +38,8 @@ public class UserService(
         _validateAccessTokenCommand.ExecuteAsync(accessToken);
 
     public Task<bool> LogoutAsync(string? refreshToken) =>
-    _logoutUserCommand.ExecuteAsync(refreshToken);
+        _logoutUserCommand.ExecuteAsync(refreshToken);
+
+    public Task<bool> UpdateUserAsync(Guid publicId, UpdateUserRequestDTO dto) =>
+        _updateUserCommand.ExecuteAsync((publicId, dto));
 }

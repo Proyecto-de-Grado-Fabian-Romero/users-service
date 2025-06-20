@@ -1,5 +1,6 @@
 using System;
 using UsersService.Src.Application.DTOs;
+using UsersService.Src.Application.DTOs.Update;
 
 namespace UsersService.Src.Application.Interfaces;
 
@@ -16,4 +17,6 @@ public interface IUserService
     Task<bool> IsAccessTokenValidAsync(string accessToken);
 
     Task<bool> LogoutAsync(string? refreshToken);
+
+    Task<bool> UpdateUserAsync(Guid publicId, UpdateUserRequestDTO dto);
 }

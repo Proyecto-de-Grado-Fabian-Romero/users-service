@@ -6,6 +6,7 @@ using UsersService.Src.Application.Commands.Concretes.BankPayment;
 using UsersService.Src.Application.Commands.Data;
 using UsersService.Src.Application.Commands.Interfaces;
 using UsersService.Src.Application.DTOs;
+using UsersService.Src.Application.DTOs.Update;
 using UsersService.Src.Application.Interfaces;
 using UsersService.Src.Application.Mapping;
 using UsersService.Src.Application.Options;
@@ -52,6 +53,7 @@ builder.Services.AddScoped<IBankPaymentDataRepository, BankPaymentDataRepository
 builder.Services.AddScoped<IBankPaymentDataService, BankPaymentDataService>();
 
 builder.Services.AddScoped<ICommand<(string, string), LoggedUserDTO?>, LoginUserCommand>();
+builder.Services.AddScoped<ICommand<(Guid PublicId, UpdateUserRequestDTO Request), bool>, UpdateUserCommand>();
 builder.Services.AddScoped<ICommand<string, LoggedUserDTO?>, GetLoggedUserCommand>();
 builder.Services.AddScoped<ICommand<Guid, UserDTO?>, GetUserByPublicIdCommand>();
 builder.Services.AddScoped<ICommand<string, string?>, RefreshAccessTokenCommand>();

@@ -48,7 +48,7 @@ public class UpdateUserCommand(
         {
             Username = user.Id.ToString(),
             UserPoolId = _settings.UserPoolId,
-            UserAttributes = new List<AttributeType>(),
+            UserAttributes = [],
         };
 
         if (request.Name != null)
