@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UsersService.Src.Application.DTOs;
+using UsersService.Src.Application.DTOs.Update;
 using UsersService.Src.Application.Interfaces;
 
 namespace UsersService.src.WebApi.Controllers;
@@ -147,5 +148,26 @@ public class UsersController(IUserService userService) : ControllerBase
         Response.Cookies.Delete("publicId");
 
         return Ok(new { message = "Logged out successfully." });
+    }
+
+    [Authorize]
+    [HttpPut("update")]
+    public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequestDTO dto)
+    {
+        var publicIdStr = Request.Cookies["publicId"];
+        if (string.IsNullOrEmpty(publicIdStr))
+        {
+            return Unauthorized();
+        }
+
+        var publicId = Guid.Parse(publicIdStr);
+        var result = await _userService.UpdateUserAsync(publicId, dto);
+
+        if (!result)
+        {
+            return BadRequest("Failed to update user");
+        }
+
+        return Ok(new { message = "User updated successfully." });
     }
 }
