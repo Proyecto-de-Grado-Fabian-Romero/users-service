@@ -11,7 +11,7 @@ public class BankPaymentDataController(IBankPaymentDataService service) : Contro
     private readonly IBankPaymentDataService _service = service;
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateBankPaymentDataDto dto)
+    public async Task<IActionResult> Create([FromBody] UpdateBankPaymentDataDto dto)
     {
         var publicIdStr = Request.Cookies["publicId"];
         if (!Guid.TryParse(publicIdStr, out var publicId))

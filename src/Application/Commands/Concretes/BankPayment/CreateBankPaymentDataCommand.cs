@@ -12,7 +12,7 @@ public class CreateBankPaymentDataCommand(
 {
     public async Task<bool> ExecuteAsync(BankPaymentInput input)
     {
-        if (input.CreateDto is null)
+        if (input.Dto is null)
         {
             throw new ArgumentException("Create DTO is required.");
         }
@@ -29,9 +29,9 @@ public class CreateBankPaymentDataCommand(
         var data = new BankPaymentData
         {
             UserId = user.Id,
-            BankAccountNumber = input.CreateDto.BankAccountNumber,
-            BankAccountHolder = input.CreateDto.BankAccountHolder,
-            BankName = input.CreateDto.BankName,
+            BankAccountNumber = input.Dto.BankAccountNumber,
+            BankAccountHolder = input.Dto.BankAccountHolder,
+            BankName = input.Dto.BankName,
         };
 
         await bankRepository.AddAsync(data);

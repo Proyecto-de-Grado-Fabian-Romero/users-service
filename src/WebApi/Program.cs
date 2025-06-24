@@ -3,7 +3,6 @@ using Amazon.Extensions.CognitoAuthentication;
 using Microsoft.EntityFrameworkCore;
 using UsersService.Src.Application.Commands.Concretes;
 using UsersService.Src.Application.Commands.Concretes.BankPayment;
-using UsersService.Src.Application.Commands.Data;
 using UsersService.Src.Application.Commands.Interfaces;
 using UsersService.Src.Application.DTOs;
 using UsersService.Src.Application.DTOs.Update;
@@ -67,8 +66,8 @@ builder.Services.AddScoped<ICommand<string?, bool>, LogoutUserCommand>(provider 
     return new LogoutUserCommand(cognitoClient, clientId);
 #pragma warning restore CS8604 // Possible null reference argument.
 });
-builder.Services.AddScoped<ICommand<BankPaymentInput, bool>, CreateBankPaymentDataCommand>();
-builder.Services.AddScoped<ICommand<BankPaymentInput, bool>, UpdateBankPaymentDataCommand>();
+builder.Services.AddScoped<CreateBankPaymentDataCommand>();
+builder.Services.AddScoped<UpdateBankPaymentDataCommand>();
 
 builder.Services.AddSingleton(provider =>
 {
