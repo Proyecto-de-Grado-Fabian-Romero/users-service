@@ -170,4 +170,14 @@ public class UsersController(IUserService userService) : ControllerBase
 
         return Ok(new { message = "User updated successfully." });
     }
+
+    [HttpPost("signup")]
+    public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
+    {
+        var result = await _userService.SignUpAsync(request);
+
+        return result
+            ? Ok(new { message = "User registered successfully. Please confirm your email." })
+            : BadRequest("Registration failed");
+    }
 }

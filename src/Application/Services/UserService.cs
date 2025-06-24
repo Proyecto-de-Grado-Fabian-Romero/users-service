@@ -1,3 +1,4 @@
+using UsersService.src;
 using UsersService.Src.Application.Commands.Interfaces;
 using UsersService.Src.Application.DTOs;
 using UsersService.Src.Application.DTOs.Update;
@@ -12,7 +13,8 @@ public class UserService(
     ICommand<string, string?> refreshTokenCommand,
     ICommand<string?, bool> logoutUserCommand,
     ICommand<string, bool> validateAccessTokenCommand,
-    ICommand<(Guid, UpdateUserRequestDTO), bool> updateUserCommand) : IUserService
+    ICommand<(Guid, UpdateUserRequestDTO), bool> updateUserCommand,
+    ICommand<SignUpRequest, bool> signUpUserCommand) : IUserService
 {
     private readonly ICommand<(string, string), LoggedUserDTO?> _loginUserCommand = loginUserCommand;
     private readonly ICommand<string, LoggedUserDTO?> _getLoggedUserCommand = getLoggedUserCommand;
@@ -21,6 +23,11 @@ public class UserService(
     private readonly ICommand<string, bool> _validateAccessTokenCommand = validateAccessTokenCommand;
     private readonly ICommand<string?, bool> _logoutUserCommand = logoutUserCommand;
     private readonly ICommand<(Guid, UpdateUserRequestDTO), bool> _updateUserCommand = updateUserCommand;
+
+    private readonly ICommand<SignUpRequest, bool> _signUpUserCommand = signUpUserCommand;
+
+    public Task<bool> SignUpAsync(SignUpRequest request) =>
+        _signUpUserCommand.ExecuteAsync(request);
 
     public Task<UserDTO?> GetByPublicIdAsync(Guid publicId) =>
         _getUserByPublicIdCommand.ExecuteAsync(publicId);

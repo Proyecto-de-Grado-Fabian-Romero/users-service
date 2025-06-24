@@ -1,4 +1,4 @@
-using System;
+using UsersService.src;
 using UsersService.Src.Application.DTOs;
 using UsersService.Src.Application.DTOs.Update;
 
@@ -19,4 +19,6 @@ public interface IUserService
     Task<bool> LogoutAsync(string? refreshToken);
 
     Task<bool> UpdateUserAsync(Guid publicId, UpdateUserRequestDTO dto);
+
+    Task<bool> SignUpAsync(SignUpRequest request);
 }
