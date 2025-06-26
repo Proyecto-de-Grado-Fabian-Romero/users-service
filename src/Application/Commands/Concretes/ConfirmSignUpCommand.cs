@@ -13,7 +13,7 @@ public class ConfirmSignUpCommand(
 {
     private readonly AmazonCognitoIdentityProviderClient _provider = provider;
     private readonly IUserRepository _userRepository = userRepository;
-    private readonly string _clientId = configuration["AWS:Cognito:ClientId"]!;
+    private readonly string _clientId = configuration["AWS:Cognito:ClientId"] !;
 
     public async Task<bool> ExecuteAsync(ConfirmSignUpRequest input)
     {
