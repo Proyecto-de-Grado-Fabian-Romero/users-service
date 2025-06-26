@@ -1,4 +1,4 @@
-namespace UsersService.src;
+namespace UsersService.Src.Application.DTOs;
 
 public class SignUpRequest
 {

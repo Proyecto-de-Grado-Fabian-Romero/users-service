@@ -4,6 +4,7 @@ using Amazon.CognitoIdentityProvider;
 using Amazon.Extensions.CognitoAuthentication;
 using AutoMapper;
 using UsersService.Src.Application.Commands.Interfaces;
+using UsersService.Src.Application.DTOs;
 using UsersService.Src.Domain.Entities;
 using UsersService.Src.Domain.Interfaces;
 
@@ -12,14 +13,14 @@ public class SignUpUserCommand(
     CognitoUserPool userPool,
     IUserRepository userRepository,
     IMapper mapper)
-    : ICommand<src.SignUpRequest, bool>
+    : ICommand<SignUpRequest, bool>
 {
     private readonly AmazonCognitoIdentityProviderClient _provider = provider;
     private readonly CognitoUserPool _userPool = userPool;
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IMapper _mapper = mapper;
 
-    public async Task<bool> ExecuteAsync(src.SignUpRequest input)
+    public async Task<bool> ExecuteAsync(SignUpRequest input)
     {
         try
         {

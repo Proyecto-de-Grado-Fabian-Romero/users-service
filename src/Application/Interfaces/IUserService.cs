@@ -21,4 +21,6 @@ public interface IUserService
     Task<bool> UpdateUserAsync(Guid publicId, UpdateUserRequestDTO dto);
 
     Task<bool> SignUpAsync(SignUpRequest request);
+
+    Task<bool> ConfirmSignUpAsync(ConfirmSignUpRequest request);
 }

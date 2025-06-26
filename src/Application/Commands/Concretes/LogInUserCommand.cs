@@ -6,6 +6,7 @@ using UsersService.Src.Application.DTOs;
 using UsersService.Src.Domain.Interfaces;
 using AutoMapper;
 using UsersService.Src.Application.Commands.Interfaces;
+using Amazon.CognitoIdentityProvider.Model;
 
 public class LoginUserCommand(AmazonCognitoIdentityProviderClient provider, CognitoUserPool userPool, IUserRepository repo, IMapper mapper) : ICommand<(string Email, string Password), LoggedUserDTO?>
 {
@@ -19,21 +20,28 @@ public class LoginUserCommand(AmazonCognitoIdentityProviderClient provider, Cogn
         var user = new CognitoUser(input.Email, _userPool.ClientID, _userPool, _provider);
         var authRequest = new InitiateSrpAuthRequest { Password = input.Password };
 
-        var authResponse = await user.StartWithSrpAuthAsync(authRequest);
-        if (authResponse.AuthenticationResult == null)
+        try
         {
-            return null;
-        }
+            var authResponse = await user.StartWithSrpAuthAsync(authRequest);
+            if (authResponse.AuthenticationResult == null)
+            {
+                return null;
+            }
 
-        var appUser = await _userRepository.GetByIdAsync(Guid.Parse(user.Username));
-        if (appUser == null)
+            var appUser = await _userRepository.GetByIdAsync(Guid.Parse(user.Username));
+            if (appUser == null || !appUser.VerifiedEmail)
+            {
+                return null;
+            }
+
+            var dto = _mapper.Map<LoggedUserDTO>(appUser);
+            dto.AccessToken = authResponse.AuthenticationResult.AccessToken;
+            dto.RefreshToken = authResponse.AuthenticationResult.RefreshToken;
+            return dto;
+        }
+        catch (UserNotConfirmedException)
         {
-            return null;
+            throw new Exception("User's email is not confirmed.");
         }
-
-        var dto = _mapper.Map<LoggedUserDTO>(appUser);
-        dto.AccessToken = authResponse.AuthenticationResult.AccessToken;
-        dto.RefreshToken = authResponse.AuthenticationResult.RefreshToken;
-        return dto;
     }
 }

@@ -1,3 +1,4 @@
+using Amazon.CognitoIdentityProvider.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UsersService.Src.Application.DTOs;
@@ -22,37 +23,49 @@ public class UsersController(IUserService userService) : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult> Login([FromBody] LoginRequest request)
     {
-        var user = await _userService.LoginAsync(request.Email, request.Password);
-        if (user == null)
+        try
         {
-            return Unauthorized("Invalid credentials");
+            var user = await _userService.LoginAsync(request.Email, request.Password);
+
+            if (user == null)
+            {
+                return Unauthorized("Invalid credentials");
+            }
+
+            Response.Cookies.Append("accessToken", user.AccessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(1),
+            });
+
+            Response.Cookies.Append("refreshToken", user.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(100),
+            });
+
+            Response.Cookies.Append("publicId", user.PublicId.ToString(), new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(100),
+            });
+
+            return Ok(user);
         }
-
-        Response.Cookies.Append("accessToken", user.AccessToken, new CookieOptions
+        catch (UserNotConfirmedException)
         {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(1),
-        });
-
-        Response.Cookies.Append("refreshToken", user.RefreshToken, new CookieOptions
+            return BadRequest("Please confirm your email before logging in.");
+        }
+        catch (Exception ex)
         {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(100),
-        });
-
-        Response.Cookies.Append("publicId", user.PublicId.ToString(), new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(100),
-        });
-
-        return Ok(user);
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
     [HttpGet("me")]
@@ -172,12 +185,34 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpPost("signup")]
-    public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
+    public async Task<IActionResult> SignUp([FromBody] Src.Application.DTOs.SignUpRequest request)
     {
         var result = await _userService.SignUpAsync(request);
 
         return result
             ? Ok(new { message = "User registered successfully. Please confirm your email." })
             : BadRequest("Registration failed");
+    }
+
+    [HttpPost("confirm-signup")]
+    public async Task<IActionResult> ConfirmSignUp([FromBody] Src.Application.DTOs.ConfirmSignUpRequest request)
+    {
+        try
+        {
+            var result = await _userService.ConfirmSignUpAsync(request);
+
+            if (result)
+            {
+                return Ok(new { message = "Account confirmed successfully." });
+            }
+            else
+            {
+                return BadRequest("Confirmation failed. Please check the confirmation code.");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 }
