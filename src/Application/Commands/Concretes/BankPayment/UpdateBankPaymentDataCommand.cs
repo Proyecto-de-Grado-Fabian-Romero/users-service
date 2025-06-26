@@ -10,7 +10,7 @@ public class UpdateBankPaymentDataCommand(
 {
     public async Task<bool> ExecuteAsync(BankPaymentInput input)
     {
-        if (input.UpdateDto is null)
+        if (input.Dto is null)
         {
             throw new ArgumentException("Update DTO is required.");
         }
@@ -18,9 +18,9 @@ public class UpdateBankPaymentDataCommand(
         var data = await bankRepository.GetByUserPublicIdAsync(input.UserPublicId)
                    ?? throw new Exception("Datos bancarios no encontrados");
 
-        data.BankAccountNumber = input.UpdateDto.BankAccountNumber;
-        data.BankAccountHolder = input.UpdateDto.BankAccountHolder;
-        data.BankName = input.UpdateDto.BankName;
+        data.BankAccountNumber = input.Dto.BankAccountNumber;
+        data.BankAccountHolder = input.Dto.BankAccountHolder;
+        data.BankName = input.Dto.BankName;
 
         await bankRepository.UpdateAsync(data);
         return true;

@@ -1,3 +1,4 @@
+using UsersService.Src.Application.Commands.Concretes.BankPayment;
 using UsersService.Src.Application.Commands.Data;
 using UsersService.Src.Application.Commands.Interfaces;
 using UsersService.Src.Application.DTOs.BankPaymentData;
@@ -7,19 +8,19 @@ using UsersService.Src.Domain.Interfaces;
 namespace UsersService.Src.Application.Services;
 
 public class BankPaymentDataService(
-    ICommand<BankPaymentInput, bool> createCommand,
-    ICommand<BankPaymentInput, bool> updateCommand,
+    CreateBankPaymentDataCommand createCommand,
+    UpdateBankPaymentDataCommand updateCommand,
     IUserRepository userRepository)
     : IBankPaymentDataService
 {
     private readonly IUserRepository _userRepository = userRepository;
 
-    public async Task CreateAsync(CreateBankPaymentDataDto dto, Guid userPublicId)
+    public async Task CreateAsync(UpdateBankPaymentDataDto dto, Guid userPublicId)
     {
         var input = new BankPaymentInput
         {
             UserPublicId = userPublicId,
-            CreateDto = dto,
+            Dto = dto,
         };
 
         await createCommand.ExecuteAsync(input);
@@ -32,7 +33,7 @@ public class BankPaymentDataService(
         var input = new BankPaymentInput
         {
             UserPublicId = userPublicId,
-            UpdateDto = dto,
+            Dto = dto,
         };
 
         await updateCommand.ExecuteAsync(input);

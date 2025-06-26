@@ -6,7 +6,5 @@ public class BankPaymentInput
 {
     public Guid UserPublicId { get; set; }
 
-    public CreateBankPaymentDataDto? CreateDto { get; set; }
-
-    public UpdateBankPaymentDataDto? UpdateDto { get; set; }
+    required public UpdateBankPaymentDataDto Dto { get; set; }
 }

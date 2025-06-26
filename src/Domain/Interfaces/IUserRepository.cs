@@ -10,5 +10,7 @@ public interface IUserRepository
 
     Task PromoteToOwnerAsync(Guid publicId);
 
+    Task AddAsync(User user);
+
     Task SaveChangesAsync();
 }

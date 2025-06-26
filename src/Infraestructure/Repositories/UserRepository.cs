@@ -32,6 +32,12 @@ public class UserRepository(AppDbContext context) : IUserRepository
         }
     }
 
+    public async Task AddAsync(User user)
+    {
+        await _context.Users.AddAsync(user);
+        await SaveChangesAsync();
+    }
+
     public async Task SaveChangesAsync() =>
         await _context.SaveChangesAsync();
 }

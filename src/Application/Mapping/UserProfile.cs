@@ -1,6 +1,7 @@
 namespace UsersService.Src.Application.Mapping;
 
 using AutoMapper;
+using UsersService.src;
 using UsersService.Src.Application.DTOs;
 using UsersService.Src.Application.DTOs.BankPaymentData;
 using UsersService.Src.Domain.Entities;
@@ -21,6 +22,11 @@ public class UserProfile : Profile
 
         CreateMap<LoggedUserDTO, User>()
             .ForMember(dest => dest.Role, opt => opt.MapFrom(src => Enum.Parse<UserRole>(src.Role)));
+
+        CreateMap<SignUpRequest, User>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.Parse(src.UserId)))
+            .ForMember(dest => dest.VerifiedEmail, opt => opt.MapFrom(_ => false))
+            .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone));
 
         CreateMap<BankPaymentData, BankPaymentDataDTO>();
     }
