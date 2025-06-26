@@ -1,6 +1,7 @@
 using Amazon.CognitoIdentityProvider;
 using Amazon.Extensions.CognitoAuthentication;
 using Microsoft.EntityFrameworkCore;
+using UsersService.src.Application.Commands.Concretes;
 using UsersService.Src.Application.Commands.Concretes;
 using UsersService.Src.Application.Commands.Concretes.BankPayment;
 using UsersService.Src.Application.Commands.Interfaces;
@@ -57,6 +58,8 @@ builder.Services.AddScoped<ICommand<string, LoggedUserDTO?>, GetLoggedUserComman
 builder.Services.AddScoped<ICommand<Guid, UserDTO?>, GetUserByPublicIdCommand>();
 builder.Services.AddScoped<ICommand<string, string?>, RefreshAccessTokenCommand>();
 builder.Services.AddScoped<ICommand<string, bool>, ValidateAccessTokenCommand>();
+builder.Services.AddScoped<ICommand<SignUpRequest, bool>, SignUpUserCommand>();
+builder.Services.AddScoped<ICommand<ConfirmSignUpRequest, bool>, ConfirmSignUpCommand>();
 builder.Services.AddScoped<ICommand<string?, bool>, LogoutUserCommand>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();

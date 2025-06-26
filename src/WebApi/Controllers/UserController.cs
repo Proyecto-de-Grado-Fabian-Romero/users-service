@@ -185,12 +185,34 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpPost("signup")]
-    public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
+    public async Task<IActionResult> SignUp([FromBody] Src.Application.DTOs.SignUpRequest request)
     {
         var result = await _userService.SignUpAsync(request);
 
         return result
             ? Ok(new { message = "User registered successfully. Please confirm your email." })
             : BadRequest("Registration failed");
+    }
+
+    [HttpPost("confirm-signup")]
+    public async Task<IActionResult> ConfirmSignUp([FromBody] Src.Application.DTOs.ConfirmSignUpRequest request)
+    {
+        try
+        {
+            var result = await _userService.ConfirmSignUpAsync(request);
+
+            if (result)
+            {
+                return Ok(new { message = "Account confirmed successfully." });
+            }
+            else
+            {
+                return BadRequest("Confirmation failed. Please check the confirmation code.");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 }

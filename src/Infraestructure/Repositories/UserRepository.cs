@@ -38,6 +38,19 @@ public class UserRepository(AppDbContext context) : IUserRepository
         await SaveChangesAsync();
     }
 
+    public async Task MarkEmailAsVerifiedAsync(Guid userId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user != null)
+        {
+            user.VerifiedEmail = true;
+            await SaveChangesAsync();
+        }
+    }
+
+    public Task<User?> GetByEmailAsync(string email) =>
+    _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email.Trim(), StringComparison.CurrentCultureIgnoreCase));
+
     public async Task SaveChangesAsync() =>
         await _context.SaveChangesAsync();
 }
