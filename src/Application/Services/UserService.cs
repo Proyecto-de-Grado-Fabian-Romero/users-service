@@ -1,3 +1,4 @@
+using UsersService.src.Application.Commands.Interfaces;
 using UsersService.Src.Application.Commands.Interfaces;
 using UsersService.Src.Application.DTOs;
 using UsersService.Src.Application.DTOs.Update;
@@ -14,7 +15,8 @@ public class UserService(
     ICommand<string, bool> validateAccessTokenCommand,
     ICommand<(Guid, UpdateUserRequestDTO), bool> updateUserCommand,
     ICommand<SignUpRequest, bool> signUpUserCommand,
-    ICommand<ConfirmSignUpRequest, bool> confirmSignUpUserCommand) : IUserService
+    ICommand<ConfirmSignUpRequest, bool> confirmSignUpUserCommand,
+    IResendConfirmationCodeCommand resendConfirmationCodeCommand) : IUserService
 {
     private readonly ICommand<(string, string), LoggedUserDTO?> _loginUserCommand = loginUserCommand;
     private readonly ICommand<string, LoggedUserDTO?> _getLoggedUserCommand = getLoggedUserCommand;
@@ -25,6 +27,7 @@ public class UserService(
     private readonly ICommand<(Guid, UpdateUserRequestDTO), bool> _updateUserCommand = updateUserCommand;
     private readonly ICommand<SignUpRequest, bool> _signUpUserCommand = signUpUserCommand;
     private readonly ICommand<ConfirmSignUpRequest, bool> _confirmSignUpUserCommand = confirmSignUpUserCommand;
+    private readonly IResendConfirmationCodeCommand _resendConfirmationCodeCommand = resendConfirmationCodeCommand;
 
     public Task<bool> SignUpAsync(SignUpRequest request) =>
         _signUpUserCommand.ExecuteAsync(request);
@@ -52,4 +55,7 @@ public class UserService(
 
     public Task<bool> ConfirmSignUpAsync(ConfirmSignUpRequest request) =>
         _confirmSignUpUserCommand.ExecuteAsync(request);
+
+    public Task<bool> ResendConfirmationCodeAsync(string email) =>
+        _resendConfirmationCodeCommand.ExecuteAsync(email);
 }

@@ -215,4 +215,17 @@ public class UsersController(IUserService userService) : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+    [HttpPost("resend-code")]
+    public async Task<IActionResult> ResendConfirmationCode([FromBody] ResendCodeRequest request)
+    {
+        var result = await _userService.ResendConfirmationCodeAsync(request.Email);
+
+        if (result)
+        {
+            return Ok(new { message = "Confirmation code resent successfully." });
+        }
+
+        return BadRequest("Failed to resend confirmation code.");
+    }
 }

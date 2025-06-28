@@ -23,4 +23,6 @@ public interface IUserService
     Task<bool> SignUpAsync(SignUpRequest request);
 
     Task<bool> ConfirmSignUpAsync(ConfirmSignUpRequest request);
+
+    Task<bool> ResendConfirmationCodeAsync(string email);
 }
