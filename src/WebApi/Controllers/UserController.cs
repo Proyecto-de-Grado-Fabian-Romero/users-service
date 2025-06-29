@@ -219,7 +219,7 @@ public class UsersController(IUserService userService) : ControllerBase
     [HttpPost("resend-code")]
     public async Task<IActionResult> ResendConfirmationCode([FromBody] ResendCodeRequest request)
     {
-        var result = await _userService.ResendConfirmationCodeAsync(request.Email);
+        var result = await _userService.ResendConfirmationCodeAsync(request);
 
         if (result)
         {
@@ -243,5 +243,23 @@ public class UsersController(IUserService userService) : ControllerBase
         return result
             ? Ok(new { message = "Password changed successfully." })
             : BadRequest("Failed to change password. Please verify your current password.");
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] Src.Application.DTOs.ForgotPasswordRequest request)
+    {
+        var result = await _userService.StartPasswordResetAsync(request);
+        return result
+            ? Ok(new { message = "Password reset code sent." })
+            : BadRequest("Failed to send reset code.");
+    }
+
+    [HttpPost("confirm-forgot-password")]
+    public async Task<IActionResult> ConfirmForgotPassword([FromBody] Src.Application.DTOs.ConfirmForgotPasswordRequest request)
+    {
+        var result = await _userService.ConfirmPasswordResetAsync(request);
+        return result
+            ? Ok(new { message = "Password updated successfully." })
+            : BadRequest("Failed to reset password. Check code or try again.");
     }
 }

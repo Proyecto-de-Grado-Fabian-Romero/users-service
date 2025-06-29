@@ -23,7 +23,11 @@ public interface IUserService
 
     Task<bool> ConfirmSignUpAsync(ConfirmSignUpRequest request);
 
-    Task<bool> ResendConfirmationCodeAsync(string email);
+    Task<bool> ResendConfirmationCodeAsync(ResendCodeRequest email);
 
     Task<bool> ChangePasswordAsync(string accessToken, ChangePasswordRequest request);
+
+    Task<bool> StartPasswordResetAsync(ForgotPasswordRequest request);
+
+    Task<bool> ConfirmPasswordResetAsync(ConfirmForgotPasswordRequest request);
 }

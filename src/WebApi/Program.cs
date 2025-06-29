@@ -60,6 +60,10 @@ builder.Services.AddScoped<ICommand<string, string?>, RefreshAccessTokenCommand>
 builder.Services.AddScoped<ICommand<string, bool>, ValidateAccessTokenCommand>();
 builder.Services.AddScoped<ICommand<SignUpRequest, bool>, SignUpUserCommand>();
 builder.Services.AddScoped<ICommand<ConfirmSignUpRequest, bool>, ConfirmSignUpCommand>();
+builder.Services.AddScoped<ICommand<ResendCodeRequest, bool>, ResendConfirmationCodeCommand>();
+builder.Services.AddScoped<ICommand<(string, ChangePasswordRequest), bool>, ChangePasswordCommand>();
+builder.Services.AddScoped<ICommand<ForgotPasswordRequest, bool>, ForgotPasswordCommand>();
+builder.Services.AddScoped<ICommand<ConfirmForgotPasswordRequest, bool>, ConfirmForgotPasswordCommand>();
 builder.Services.AddScoped<ICommand<string?, bool>, LogoutUserCommand>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
