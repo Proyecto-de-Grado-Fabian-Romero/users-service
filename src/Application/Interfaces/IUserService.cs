@@ -1,4 +1,3 @@
-using UsersService.src;
 using UsersService.Src.Application.DTOs;
 using UsersService.Src.Application.DTOs.Update;
 
@@ -25,4 +24,6 @@ public interface IUserService
     Task<bool> ConfirmSignUpAsync(ConfirmSignUpRequest request);
 
     Task<bool> ResendConfirmationCodeAsync(string email);
+
+    Task<bool> ChangePasswordAsync(string accessToken, ChangePasswordRequest request);
 }

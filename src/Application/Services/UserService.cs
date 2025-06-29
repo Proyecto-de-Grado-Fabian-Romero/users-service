@@ -16,7 +16,9 @@ public class UserService(
     ICommand<(Guid, UpdateUserRequestDTO), bool> updateUserCommand,
     ICommand<SignUpRequest, bool> signUpUserCommand,
     ICommand<ConfirmSignUpRequest, bool> confirmSignUpUserCommand,
-    IResendConfirmationCodeCommand resendConfirmationCodeCommand) : IUserService
+    IResendConfirmationCodeCommand resendConfirmationCodeCommand,
+    ICommand<(string, ChangePasswordRequest), bool> changePasswordCommand
+) : IUserService
 {
     private readonly ICommand<(string, string), LoggedUserDTO?> _loginUserCommand = loginUserCommand;
     private readonly ICommand<string, LoggedUserDTO?> _getLoggedUserCommand = getLoggedUserCommand;
@@ -28,6 +30,8 @@ public class UserService(
     private readonly ICommand<SignUpRequest, bool> _signUpUserCommand = signUpUserCommand;
     private readonly ICommand<ConfirmSignUpRequest, bool> _confirmSignUpUserCommand = confirmSignUpUserCommand;
     private readonly IResendConfirmationCodeCommand _resendConfirmationCodeCommand = resendConfirmationCodeCommand;
+
+    private readonly ICommand<(string, ChangePasswordRequest), bool> _changePasswordCommand = changePasswordCommand;
 
     public Task<bool> SignUpAsync(SignUpRequest request) =>
         _signUpUserCommand.ExecuteAsync(request);
@@ -58,4 +62,7 @@ public class UserService(
 
     public Task<bool> ResendConfirmationCodeAsync(string email) =>
         _resendConfirmationCodeCommand.ExecuteAsync(email);
+
+    public Task<bool> ChangePasswordAsync(string accessToken, ChangePasswordRequest request) =>
+        _changePasswordCommand.ExecuteAsync((accessToken, request));
 }

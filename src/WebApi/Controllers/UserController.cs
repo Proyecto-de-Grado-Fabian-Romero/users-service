@@ -228,4 +228,20 @@ public class UsersController(IUserService userService) : ControllerBase
 
         return BadRequest("Failed to resend confirmation code.");
     }
+
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] Src.Application.DTOs.ChangePasswordRequest request)
+    {
+        var accessToken = Request.Cookies["accessToken"];
+        if (string.IsNullOrEmpty(accessToken))
+        {
+            return Unauthorized("Access token missing.");
+        }
+
+        var result = await _userService.ChangePasswordAsync(accessToken, request);
+
+        return result
+            ? Ok(new { message = "Password changed successfully." })
+            : BadRequest("Failed to change password. Please verify your current password.");
+    }
 }
