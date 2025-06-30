@@ -14,7 +14,12 @@ public class UserService(
     ICommand<string, bool> validateAccessTokenCommand,
     ICommand<(Guid, UpdateUserRequestDTO), bool> updateUserCommand,
     ICommand<SignUpRequest, bool> signUpUserCommand,
-    ICommand<ConfirmSignUpRequest, bool> confirmSignUpUserCommand) : IUserService
+    ICommand<ConfirmSignUpRequest, bool> confirmSignUpUserCommand,
+    ICommand<ResendCodeRequest, bool> resendConfirmationCodeCommand,
+    ICommand<(string, ChangePasswordRequest), bool> changePasswordCommand,
+    ICommand<ForgotPasswordRequest, bool> forgotPasswordCommand,
+    ICommand<ConfirmForgotPasswordRequest, bool> confirmForgotPasswordCommand
+) : IUserService
 {
     private readonly ICommand<(string, string), LoggedUserDTO?> _loginUserCommand = loginUserCommand;
     private readonly ICommand<string, LoggedUserDTO?> _getLoggedUserCommand = getLoggedUserCommand;
@@ -25,6 +30,10 @@ public class UserService(
     private readonly ICommand<(Guid, UpdateUserRequestDTO), bool> _updateUserCommand = updateUserCommand;
     private readonly ICommand<SignUpRequest, bool> _signUpUserCommand = signUpUserCommand;
     private readonly ICommand<ConfirmSignUpRequest, bool> _confirmSignUpUserCommand = confirmSignUpUserCommand;
+    private readonly ICommand<ResendCodeRequest, bool> _resendConfirmationCodeCommand = resendConfirmationCodeCommand;
+    private readonly ICommand<(string, ChangePasswordRequest), bool> _changePasswordCommand = changePasswordCommand;
+    private readonly ICommand<ForgotPasswordRequest, bool> _forgotPasswordCommand = forgotPasswordCommand;
+    private readonly ICommand<ConfirmForgotPasswordRequest, bool> _confirmForgotPasswordCommand = confirmForgotPasswordCommand;
 
     public Task<bool> SignUpAsync(SignUpRequest request) =>
         _signUpUserCommand.ExecuteAsync(request);
@@ -52,4 +61,16 @@ public class UserService(
 
     public Task<bool> ConfirmSignUpAsync(ConfirmSignUpRequest request) =>
         _confirmSignUpUserCommand.ExecuteAsync(request);
+
+    public Task<bool> ResendConfirmationCodeAsync(ResendCodeRequest request) =>
+        _resendConfirmationCodeCommand.ExecuteAsync(request);
+
+    public Task<bool> ChangePasswordAsync(string accessToken, ChangePasswordRequest request) =>
+        _changePasswordCommand.ExecuteAsync((accessToken, request));
+
+    public Task<bool> StartPasswordResetAsync(ForgotPasswordRequest request) =>
+    _forgotPasswordCommand.ExecuteAsync(request);
+
+    public Task<bool> ConfirmPasswordResetAsync(ConfirmForgotPasswordRequest request) =>
+        _confirmForgotPasswordCommand.ExecuteAsync(request);
 }

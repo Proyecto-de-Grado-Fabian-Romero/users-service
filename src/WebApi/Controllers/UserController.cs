@@ -215,4 +215,51 @@ public class UsersController(IUserService userService) : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+    [HttpPost("resend-code")]
+    public async Task<IActionResult> ResendConfirmationCode([FromBody] ResendCodeRequest request)
+    {
+        var result = await _userService.ResendConfirmationCodeAsync(request);
+
+        if (result)
+        {
+            return Ok(new { message = "Confirmation code resent successfully." });
+        }
+
+        return BadRequest("Failed to resend confirmation code.");
+    }
+
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] Src.Application.DTOs.ChangePasswordRequest request)
+    {
+        var accessToken = Request.Cookies["accessToken"];
+        if (string.IsNullOrEmpty(accessToken))
+        {
+            return Unauthorized("Access token missing.");
+        }
+
+        var result = await _userService.ChangePasswordAsync(accessToken, request);
+
+        return result
+            ? Ok(new { message = "Password changed successfully." })
+            : BadRequest("Failed to change password. Please verify your current password.");
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] Src.Application.DTOs.ForgotPasswordRequest request)
+    {
+        var result = await _userService.StartPasswordResetAsync(request);
+        return result
+            ? Ok(new { message = "Password reset code sent." })
+            : BadRequest("Failed to send reset code.");
+    }
+
+    [HttpPost("confirm-forgot-password")]
+    public async Task<IActionResult> ConfirmForgotPassword([FromBody] Src.Application.DTOs.ConfirmForgotPasswordRequest request)
+    {
+        var result = await _userService.ConfirmPasswordResetAsync(request);
+        return result
+            ? Ok(new { message = "Password updated successfully." })
+            : BadRequest("Failed to reset password. Check code or try again.");
+    }
 }
