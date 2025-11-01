@@ -25,8 +25,9 @@ public class ForgotPasswordCommand(
             var response = await provider.ForgotPasswordAsync(request);
             return response.HttpStatusCode == HttpStatusCode.OK;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine(ex);
             return false;
         }
     }

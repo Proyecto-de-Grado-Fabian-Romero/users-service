@@ -25,36 +25,48 @@ public class UsersController(IUserService userService) : ControllerBase
     {
         try
         {
-            var user = await _userService.LoginAsync(request.Email, request.Password);
+            var user = await _userService.LoginAsync(request);
 
             if (user == null)
             {
                 return Unauthorized("Invalid credentials");
             }
 
-            Response.Cookies.Append("accessToken", user.AccessToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(1),
-            });
+            Response.Cookies.Append(
+                "accessToken",
+                user.AccessToken,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(1),
+                }
+            );
 
-            Response.Cookies.Append("refreshToken", user.RefreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(100),
-            });
+            Response.Cookies.Append(
+                "refreshToken",
+                user.RefreshToken,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(100),
+                }
+            );
 
-            Response.Cookies.Append("publicId", user.PublicId.ToString(), new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(100),
-            });
+            Response.Cookies.Append(
+                "publicId",
+                user.PublicId.ToString(),
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(100),
+                }
+            );
 
             return Ok(user);
         }
@@ -74,7 +86,10 @@ public class UsersController(IUserService userService) : ControllerBase
         var accessToken = Request.Cookies["accessToken"];
         var refreshToken = Request.Cookies["refreshToken"];
 
-        if ((string.IsNullOrEmpty(accessToken) && string.IsNullOrEmpty(refreshToken)) || accessToken == null)
+        if (
+            (string.IsNullOrEmpty(accessToken) && string.IsNullOrEmpty(refreshToken))
+            || accessToken == null
+        )
         {
             return Unauthorized("No tokens provided.");
         }
@@ -91,13 +106,17 @@ public class UsersController(IUserService userService) : ControllerBase
 
             if (!string.IsNullOrEmpty(newAccessToken))
             {
-                Response.Cookies.Append("accessToken", newAccessToken, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.UtcNow.AddDays(1),
-                });
+                Response.Cookies.Append(
+                    "accessToken",
+                    newAccessToken,
+                    new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = DateTime.UtcNow.AddDays(1),
+                    }
+                );
 
                 var refreshedUser = await _userService.GetUserFromAccessTokenAsync(newAccessToken);
                 if (refreshedUser != null)
@@ -125,13 +144,17 @@ public class UsersController(IUserService userService) : ControllerBase
             return Unauthorized("Invalid refresh token.");
         }
 
-        Response.Cookies.Append("accessToken", newAccessToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(1),
-        });
+        Response.Cookies.Append(
+            "accessToken",
+            newAccessToken,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(1),
+            }
+        );
 
         return Ok(new { message = "Access token refreshed." });
     }
@@ -163,7 +186,6 @@ public class UsersController(IUserService userService) : ControllerBase
         return Ok(new { message = "Logged out successfully." });
     }
 
-    [Authorize]
     [HttpPut("update")]
     public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequestDTO dto)
     {
@@ -195,7 +217,9 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpPost("confirm-signup")]
-    public async Task<IActionResult> ConfirmSignUp([FromBody] Src.Application.DTOs.ConfirmSignUpRequest request)
+    public async Task<IActionResult> ConfirmSignUp(
+        [FromBody] Src.Application.DTOs.ConfirmSignUpRequest request
+    )
     {
         try
         {
@@ -230,7 +254,9 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpPost("change-password")]
-    public async Task<IActionResult> ChangePassword([FromBody] Src.Application.DTOs.ChangePasswordRequest request)
+    public async Task<IActionResult> ChangePassword(
+        [FromBody] Src.Application.DTOs.ChangePasswordRequest request
+    )
     {
         var accessToken = Request.Cookies["accessToken"];
         if (string.IsNullOrEmpty(accessToken))
@@ -246,7 +272,9 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPassword([FromBody] Src.Application.DTOs.ForgotPasswordRequest request)
+    public async Task<IActionResult> ForgotPassword(
+        [FromBody] Src.Application.DTOs.ForgotPasswordRequest request
+    )
     {
         var result = await _userService.StartPasswordResetAsync(request);
         return result
@@ -255,7 +283,9 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpPost("confirm-forgot-password")]
-    public async Task<IActionResult> ConfirmForgotPassword([FromBody] Src.Application.DTOs.ConfirmForgotPasswordRequest request)
+    public async Task<IActionResult> ConfirmForgotPassword(
+        [FromBody] Src.Application.DTOs.ConfirmForgotPasswordRequest request
+    )
     {
         var result = await _userService.ConfirmPasswordResetAsync(request);
         return result

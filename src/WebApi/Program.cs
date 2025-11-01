@@ -13,6 +13,7 @@ using UsersService.Src.Application.Options;
 using UsersService.Src.Application.Services;
 using UsersService.Src.Domain.Interfaces;
 using UsersService.Src.Infraestructure.Data;
+using UsersService.Src.Infraestructure.Messaging;
 using UsersService.Src.Infraestructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,39 +22,73 @@ DotNetEnv.Env.Load();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder
+    .Configuration.SetBasePath(builder.Environment.ContentRootPath)
+    .AddJsonFile(
+        $"appsettings.{builder.Environment.EnvironmentName}.json",
+        optional: true,
+        reloadOnChange: true
+    )
+    .AddEnvironmentVariables();
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontEnd", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000")
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
-    });
+    options.AddPolicy(
+        "AllowFrontend",
+        policy =>
+        {
+            if (allowedOrigins != null && allowedOrigins.Length > 0)
+            {
+                policy
+                    .WithOrigins(allowedOrigins)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            }
+            else
+            {
+                policy
+                    .WithOrigins("http://localhost:3000", "https://localhost:3000")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            }
+        }
+    );
 });
 
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+builder.Services.Configure<UsersService.Src.Infraestructure.Messaging.RabbitMqOptions>(
+    builder.Configuration.GetSection("RabbitMq")
+);
+
+builder.Services.AddSingleton<
+    UsersService.Src.Infraestructure.Messaging.INotificationsPublisher,
+    UsersService.Src.Infraestructure.Messaging.RabbitMqNotificationsPublisher
+>();
+builder.Services.AddSingleton<IRabbitMqChannelAccessor, RabbitMqHostedConnection>();
+builder.Services.AddHostedService(sp =>
+    (RabbitMqHostedConnection)sp.GetRequiredService<IRabbitMqChannelAccessor>()
+);
+builder.Services.AddSingleton<IFcmTokenPublisher, RabbitMqFcmTokenPublisher>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBankPaymentDataRepository, BankPaymentDataRepository>();
 builder.Services.AddScoped<IBankPaymentDataService, BankPaymentDataService>();
 
-builder.Services.AddScoped<ICommand<(string, string), LoggedUserDTO?>, LoginUserCommand>();
-builder.Services.AddScoped<ICommand<(Guid PublicId, UpdateUserRequestDTO Request), bool>, UpdateUserCommand>();
+builder.Services.AddScoped<ICommand<LoginRequest, LoggedUserDTO?>, LoginUserCommand>();
+builder.Services.AddScoped<
+    ICommand<(Guid PublicId, UpdateUserRequestDTO Request), bool>,
+    UpdateUserCommand
+>();
 builder.Services.AddScoped<ICommand<string, LoggedUserDTO?>, GetLoggedUserCommand>();
 builder.Services.AddScoped<ICommand<Guid, UserDTO?>, GetUserByPublicIdCommand>();
 builder.Services.AddScoped<ICommand<string, string?>, RefreshAccessTokenCommand>();
@@ -61,9 +96,15 @@ builder.Services.AddScoped<ICommand<string, bool>, ValidateAccessTokenCommand>()
 builder.Services.AddScoped<ICommand<SignUpRequest, bool>, SignUpUserCommand>();
 builder.Services.AddScoped<ICommand<ConfirmSignUpRequest, bool>, ConfirmSignUpCommand>();
 builder.Services.AddScoped<ICommand<ResendCodeRequest, bool>, ResendConfirmationCodeCommand>();
-builder.Services.AddScoped<ICommand<(string, ChangePasswordRequest), bool>, ChangePasswordCommand>();
+builder.Services.AddScoped<
+    ICommand<(string, ChangePasswordRequest), bool>,
+    ChangePasswordCommand
+>();
 builder.Services.AddScoped<ICommand<ForgotPasswordRequest, bool>, ForgotPasswordCommand>();
-builder.Services.AddScoped<ICommand<ConfirmForgotPasswordRequest, bool>, ConfirmForgotPasswordCommand>();
+builder.Services.AddScoped<
+    ICommand<ConfirmForgotPasswordRequest, bool>,
+    ConfirmForgotPasswordCommand
+>();
 builder.Services.AddScoped<ICommand<string?, bool>, LogoutUserCommand>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
@@ -90,24 +131,19 @@ builder.Services.AddSingleton(provider =>
     return new CognitoUserPool(
         config["AWS:Cognito:UserPoolId"],
         config["AWS:Cognito:ClientId"],
-        client);
+        client
+    );
 });
-builder.Services.Configure<CognitoSettings>(
-    builder.Configuration.GetSection("AWS:Cognito"));
+builder.Services.Configure<CognitoSettings>(builder.Configuration.GetSection("AWS:Cognito"));
 
 builder.Services.AddAutoMapper(typeof(UserProfile));
 
 var app = builder.Build();
 app.MapControllers();
-app.UseCors("AllowFrontEnd");
+app.UseCors("AllowFrontend");
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

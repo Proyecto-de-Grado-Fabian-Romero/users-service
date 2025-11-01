@@ -6,7 +6,7 @@ using UsersService.Src.Application.Interfaces;
 namespace UsersService.Src.Application.Services;
 
 public class UserService(
-    ICommand<(string, string), LoggedUserDTO?> loginUserCommand,
+    ICommand<LoginRequest, LoggedUserDTO?> loginUserCommand,
     ICommand<string, LoggedUserDTO?> getLoggedUserCommand,
     ICommand<Guid, UserDTO?> getUserByPublicIdCommand,
     ICommand<string, string?> refreshTokenCommand,
@@ -21,7 +21,7 @@ public class UserService(
     ICommand<ConfirmForgotPasswordRequest, bool> confirmForgotPasswordCommand
 ) : IUserService
 {
-    private readonly ICommand<(string, string), LoggedUserDTO?> _loginUserCommand = loginUserCommand;
+    private readonly ICommand<LoginRequest, LoggedUserDTO?> _loginUserCommand = loginUserCommand;
     private readonly ICommand<string, LoggedUserDTO?> _getLoggedUserCommand = getLoggedUserCommand;
     private readonly ICommand<Guid, UserDTO?> _getUserByPublicIdCommand = getUserByPublicIdCommand;
     private readonly ICommand<string, string?> _refreshTokenCommand = refreshTokenCommand;
@@ -41,8 +41,8 @@ public class UserService(
     public Task<UserDTO?> GetByPublicIdAsync(Guid publicId) =>
         _getUserByPublicIdCommand.ExecuteAsync(publicId);
 
-    public Task<LoggedUserDTO?> LoginAsync(string email, string password) =>
-        _loginUserCommand.ExecuteAsync((email, password));
+    public Task<LoggedUserDTO?> LoginAsync(LoginRequest loginRequest) =>
+        _loginUserCommand.ExecuteAsync(loginRequest);
 
     public Task<LoggedUserDTO?> GetUserFromAccessTokenAsync(string accessToken) =>
         _getLoggedUserCommand.ExecuteAsync(accessToken);

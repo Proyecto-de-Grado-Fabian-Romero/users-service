@@ -17,6 +17,7 @@ public class ConfirmForgotPasswordCommand(
     {
         try
         {
+            Console.WriteLine(input.NewPassword);
             var request = new Amazon.CognitoIdentityProvider.Model.ConfirmForgotPasswordRequest
             {
                 ClientId = _clientId,
