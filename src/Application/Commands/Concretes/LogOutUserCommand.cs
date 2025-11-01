@@ -4,9 +4,8 @@ using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using UsersService.Src.Application.Commands.Interfaces;
 
-public class LogoutUserCommand(
-    AmazonCognitoIdentityProviderClient provider,
-    string clientId) : ICommand<string?, bool>
+public class LogoutUserCommand(AmazonCognitoIdentityProviderClient provider, string clientId)
+    : ICommand<string?, bool>
 {
     private readonly AmazonCognitoIdentityProviderClient _provider = provider;
     private readonly string _clientId = clientId;
@@ -20,11 +19,7 @@ public class LogoutUserCommand(
 
         try
         {
-            var request = new RevokeTokenRequest
-            {
-                Token = refreshToken,
-                ClientId = _clientId,
-            };
+            var request = new RevokeTokenRequest { Token = refreshToken, ClientId = _clientId };
 
             await _provider.RevokeTokenAsync(request);
             return true;

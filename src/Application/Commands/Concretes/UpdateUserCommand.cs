@@ -11,8 +11,8 @@ namespace UsersService.Src.Application.Commands.Concretes;
 public class UpdateUserCommand(
     IUserRepository userRepository,
     AmazonCognitoIdentityProviderClient cognitoClient,
-    IOptions<CognitoSettings> cognitoOptions)
-    : ICommand<(Guid PublicId, UpdateUserRequestDTO Request), bool>
+    IOptions<CognitoSettings> cognitoOptions
+) : ICommand<(Guid PublicId, UpdateUserRequestDTO Request), bool>
 {
     private readonly IUserRepository _userRepository = userRepository;
     private readonly AmazonCognitoIdentityProviderClient _cognitoClient = cognitoClient;
@@ -44,24 +44,52 @@ public class UpdateUserCommand(
 
         await _userRepository.SaveChangesAsync();
 
-        var updateRequest = new AdminUpdateUserAttributesRequest
-        {
-            Username = user.Id.ToString(),
-            UserPoolId = _settings.UserPoolId,
-            UserAttributes = [],
-        };
+        // Construir correctamente la lista de atributos
+        var attributes = new List<AttributeType>();
 
         if (request.Name != null)
         {
-            updateRequest.UserAttributes.Add(new AttributeType { Name = "name", Value = request.Name });
+            attributes.Add(new AttributeType { Name = "name", Value = request.Name });
         }
 
         if (request.Phone != null)
         {
-            updateRequest.UserAttributes.Add(new AttributeType { Name = "phone_number", Value = request.Phone });
+            // Solo añadir prefijo si no viene con + (evita duplicar +591)
+            var phoneValue = request.Phone.StartsWith("+") ? request.Phone : $"+591{request.Phone}";
+            attributes.Add(new AttributeType { Name = "phone_number", Value = phoneValue });
         }
 
-        await _cognitoClient.AdminUpdateUserAttributesAsync(updateRequest);
+        if (request.PhotoFileUrl != null)
+        {
+            // Atributo común para foto de perfil en Cognito: "picture"
+            attributes.Add(new AttributeType { Name = "picture", Value = request.PhotoFileUrl });
+        }
+
+        // Solo llamar a Cognito si hay atributos para actualizar
+        if (attributes.Count > 0)
+        {
+            var updateRequest = new AdminUpdateUserAttributesRequest
+            {
+                Username = user.Id.ToString(), // asegúrate que esto coincide con el username en Cognito
+                UserPoolId = _settings.UserPoolId,
+                UserAttributes = attributes,
+            };
+
+            try
+            {
+                await _cognitoClient.AdminUpdateUserAttributesAsync(updateRequest);
+            }
+            catch (Amazon.CognitoIdentityProvider.Model.InvalidParameterException ex)
+            {
+                Console.WriteLine(
+                    $"Warning: Cognito invalid parameter while updating user {user.Id}: {ex.Message}"
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating Cognito attributes for user {user.Id}: {ex}");
+            }
+        }
 
         return true;
     }

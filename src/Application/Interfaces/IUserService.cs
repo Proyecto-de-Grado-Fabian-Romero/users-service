@@ -7,7 +7,7 @@ public interface IUserService
 {
     Task<UserDTO?> GetByPublicIdAsync(Guid publicId);
 
-    Task<LoggedUserDTO?> LoginAsync(string email, string password);
+    Task<LoggedUserDTO?> LoginAsync(LoginRequest loginRequest);
 
     Task<LoggedUserDTO?> GetUserFromAccessTokenAsync(string accessToken);
 

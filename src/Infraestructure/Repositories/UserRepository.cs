@@ -49,7 +49,7 @@ public class UserRepository(AppDbContext context) : IUserRepository
     }
 
     public Task<User?> GetByEmailAsync(string email) =>
-    _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email.Trim(), StringComparison.CurrentCultureIgnoreCase));
+    _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email.Trim().ToLower()));
 
     public async Task SaveChangesAsync() =>
         await _context.SaveChangesAsync();

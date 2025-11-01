@@ -24,7 +24,7 @@ public class UserProfile : Profile
             .ForMember(dest => dest.Role, opt => opt.MapFrom(src => Enum.Parse<UserRole>(src.Role)));
 
         CreateMap<SignUpRequest, User>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.Parse(src.UserId)))
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
             .ForMember(dest => dest.VerifiedEmail, opt => opt.MapFrom(_ => false))
             .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone));
 
