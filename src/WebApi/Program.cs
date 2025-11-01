@@ -25,7 +25,7 @@ DotNetEnv.Env.Load();
 builder
     .Configuration.SetBasePath(builder.Environment.ContentRootPath)
     .AddJsonFile(
-        $"appsettings.Production.json",
+        $"appsettings.{builder.Environment.EnvironmentName}.json",
         optional: true,
         reloadOnChange: true
     )
@@ -142,7 +142,6 @@ var app = builder.Build();
 app.MapControllers();
 app.UseCors("AllowFrontend");
 
-// Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI();
 
