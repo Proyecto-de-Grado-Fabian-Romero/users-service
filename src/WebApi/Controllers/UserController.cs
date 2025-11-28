@@ -39,8 +39,10 @@ public class UsersController(IUserService userService) : ControllerBase
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    SameSite = SameSiteMode.None,
                     Expires = DateTime.UtcNow.AddDays(1),
+                    Domain = "spacio-app.netlify.app/",
+                    Path = "/",
                 }
             );
 
@@ -51,8 +53,10 @@ public class UsersController(IUserService userService) : ControllerBase
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    SameSite = SameSiteMode.None,
                     Expires = DateTime.UtcNow.AddDays(100),
+                    Domain = "spacio-app.netlify.app/",
+                    Path = "/",
                 }
             );
 
@@ -63,8 +67,10 @@ public class UsersController(IUserService userService) : ControllerBase
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    SameSite = SameSiteMode.None,
                     Expires = DateTime.UtcNow.AddDays(100),
+                    Domain = "spacio-app.netlify.app/",
+                    Path = "/",
                 }
             );
 
