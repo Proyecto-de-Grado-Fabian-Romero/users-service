@@ -20,10 +20,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 DotNetEnv.Env.Load();
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder
-    .Configuration.SetBasePath(builder.Environment.ContentRootPath)
+builder.Configuration
+    .SetBasePath(builder.Environment.ContentRootPath)
     .AddJsonFile(
         $"appsettings.{builder.Environment.EnvironmentName}.json",
         optional: true,
@@ -65,6 +63,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
 builder.Services.Configure<UsersService.Src.Infraestructure.Messaging.RabbitMqOptions>(
     builder.Configuration.GetSection("RabbitMq")
 );
@@ -110,9 +109,9 @@ builder.Services.AddScoped<ICommand<string?, bool>, LogoutUserCommand>(provider 
     var config = provider.GetRequiredService<IConfiguration>();
     var cognitoClient = provider.GetRequiredService<AmazonCognitoIdentityProviderClient>();
     var clientId = config["AWS:Cognito:ClientId"];
-#pragma warning disable CS8604 // Possible null reference argument.
+#pragma warning disable CS8604
     return new LogoutUserCommand(cognitoClient, clientId);
-#pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning restore CS8604
 });
 builder.Services.AddScoped<CreateBankPaymentDataCommand>();
 builder.Services.AddScoped<UpdateBankPaymentDataCommand>();
@@ -139,12 +138,14 @@ builder.Services.Configure<CognitoSettings>(builder.Configuration.GetSection("AW
 builder.Services.AddAutoMapper(typeof(UserProfile));
 
 var app = builder.Build();
-app.MapControllers();
+
+// ✅ Orden correcto del pipeline
+app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+app.MapControllers();
 
 app.Run();
